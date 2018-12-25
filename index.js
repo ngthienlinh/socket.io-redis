@@ -297,6 +297,7 @@ function adapter(uri, opts) {
   Redis.prototype.onresponse = function(channel, msg){
     var self = this;
     var response;
+    var requestid;
 
     try {
       response = JSON.parse(msg);
@@ -309,6 +310,8 @@ function adapter(uri, opts) {
       debug('ignoring unknown request');
       return;
     }
+
+    requestid = response.requestid;
 
     debug('received response %j', response);
 
@@ -329,14 +332,16 @@ function adapter(uri, opts) {
         if (request.msgCount === request.numsub) {
           clearTimeout(request.timeout);
           if (request.callback) process.nextTick(request.callback.bind(null, null, Object.keys(request.clients)));
-          delete self.requests[request.requestid];
+          // delete self.requests[request.requestid];
+          delete self.requests[requestid];
         }
         break;
 
       case requestTypes.clientRooms:
         clearTimeout(request.timeout);
         if (request.callback) process.nextTick(request.callback.bind(null, null, response.rooms));
-        delete self.requests[request.requestid];
+        // delete self.requests[request.requestid];
+        delete self.requests[requestid];
         break;
 
       case requestTypes.allRooms:
@@ -352,7 +357,8 @@ function adapter(uri, opts) {
         if (request.msgCount === request.numsub) {
           clearTimeout(request.timeout);
           if (request.callback) process.nextTick(request.callback.bind(null, null, Object.keys(request.rooms)));
-          delete self.requests[request.requestid];
+          // delete self.requests[request.requestid];
+          delete self.requests[requestid];
         }
         break;
 
@@ -361,7 +367,8 @@ function adapter(uri, opts) {
       case requestTypes.remoteDisconnect:
         clearTimeout(request.timeout);
         if (request.callback) process.nextTick(request.callback.bind(null, null));
-        delete self.requests[request.requestid];
+        // delete self.requests[request.requestid];
+        delete self.requests[requestid];
         break;
 
       case requestTypes.customRequest:
@@ -372,7 +379,8 @@ function adapter(uri, opts) {
         if (request.msgCount === request.numsub) {
           clearTimeout(request.timeout);
           if (request.callback) process.nextTick(request.callback.bind(null, null, request.replies));
-          delete self.requests[request.requestid];
+          // delete self.requests[request.requestid];
+          delete self.requests[requestid];
         }
         break;
 
